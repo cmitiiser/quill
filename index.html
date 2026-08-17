@@ -12,7 +12,7 @@
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"
       defer
-    ></script>
+    ></script>   
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/mode/simple.min.js"
       defer
@@ -321,6 +321,21 @@
 .width: 90%
 .align: center
 .alt: Event Poster</code></pre>
+
+        <h4>5. Button Block (<code>btn</code>, <code>button</code>)</h4>
+        <p>
+          Renders a responsive button tag. Pass the button text as the content body
+          inside the braces:
+        </p>
+        <pre><code>btn {
+  Register Now
+}
+.url: https://example.com/register
+.bg-color: #0066cc
+.color: #ffffff</code></pre>
+        <p>
+          Pass the URL without quotation marks. The button will automatically render as a clickable link.
+        </p>  
 
         <!-- 5. ALL AVAILABLE PROPERTIES & STYLES -->
         <h3>Property Modifiers Reference</h3>
