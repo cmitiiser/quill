@@ -1,6 +1,9 @@
 <div align='center'>
 <h1>Quill</h1>
 <p>CMIT's proprietary mail drafting application</p>
+
+<p>Maintained by <a href="https://AKwasTaken.github.io" target="_blank" rel="noopener noreferrer">AK</a>.</p>
+
 <br><br>
 </div>
 
