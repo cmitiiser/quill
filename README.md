@@ -1,6 +1,9 @@
 <div align='center'>
 <h1>Quill</h1>
 <p>CMIT's proprietary mail drafting application</p>
+
+<p>Maintained by <a href="https://AKwasTaken.github.io" target="_blank" rel="noopener noreferrer">AK</a>.</p>
+
 <br><br>
 </div>
 
@@ -21,7 +24,7 @@
 
 ## Working
 
-Srijana parses input text blocks and compiles them into inline-styled, table-based HTML wrappers guaranteed to render reliably across desktop and mobile email clients (including Gmail and Outlook).
+Quill parses input text blocks and compiles them into inline-styled, table-based HTML wrappers guaranteed to render reliably across desktop and mobile email clients (including Gmail and Outlook).
 
 ### General Syntax Rules
 
@@ -64,26 +67,3 @@ Quill
 └── template.html
 ```
 
----
-
-## Quick Start
-
-Open the site hosted here on [Github Pages](https://cmit.iisertvm.ac.in/quill), to use it live.
-
-### For local hosting, follow the instructions below:
-
-1. Clone the repository:
-
-```bash
-git clone https://github.com/cmitiiser/quill.git
-```
-
-2. CD into the projects folder
-
-```bash
-cd Quill/
-```
-
-3. Open `index.html` in any modern web browser to use the tool.
-
----
