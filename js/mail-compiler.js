@@ -14,6 +14,7 @@ fetch('template.html')
 const defaultDSL = `
 // Global Directives
 .title: Feature Showcase & Integration Testing Guide
+.banner: https://cmit.iisertvm.ac.in/assets/icons/mail_banner.jpg
 
 // Banner / Image Block / Poster Block
 img {
