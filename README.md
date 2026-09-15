@@ -67,26 +67,3 @@ Quill
 └── template.html
 ```
 
----
-
-## Quick Start
-
-Open the site hosted here on [Github Pages](https://cmit.iisertvm.ac.in/quill), to use it live.
-
-### For local hosting, follow the instructions below:
-
-1. Clone the repository:
-
-```bash
-git clone https://github.com/cmitiiser/quill.git
-```
-
-2. CD into the projects folder
-
-```bash
-cd Quill/
-```
-
-3. Open `index.html` in any modern web browser to use the tool.
-
----
