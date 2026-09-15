@@ -12,7 +12,7 @@
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"
       defer
-    ></script>   
+    ></script>
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/mode/simple.min.js"
       defer
@@ -121,6 +121,15 @@
           </div>
         </div>
 
+        <!-- SPLITTER SEPARATOR WITH CENTERED HANDLE -->
+        <div id="workspace-separator">
+          <div id="separator-handle" title="Drag to resize">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+
         <!-- PREVIEW & CODE PANE -->
         <div class="pane preview-pane">
           <div class="pane-header">
@@ -131,11 +140,11 @@
                 id="tab-preview"
                 onclick="switchTab('preview')"
               >
-                Visual Preview
+                Preview
               </button>
               <span class="pane-header-sep">|</span>
               <button class="tab-btn" id="tab-code" onclick="switchTab('code')">
-                Raw HTML Code
+                Raw
               </button>
             </div>
           </div>
@@ -335,7 +344,7 @@
 .color: #ffffff</code></pre>
         <p>
           Pass the URL without quotation marks. The button will automatically render as a clickable link.
-        </p>  
+        </p>
 
         <!-- 5. ALL AVAILABLE PROPERTIES & STYLES -->
         <h3>Property Modifiers Reference</h3>
@@ -451,5 +460,7 @@
         </table>
       </div>
     </dialog>
+
+    <script src="js/split-separator.js"></script>
   </body>
 </html>

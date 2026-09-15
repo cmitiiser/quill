@@ -359,8 +359,7 @@ dialog#docs-modal::backdrop {
   font-weight: 500;
 }
 
-/* Narrow screens: editor on top, preview below */
-@media (max-width: 991.98px) {
+@media (max-width: 768px) {
   .workspace {
     flex-direction: column;
   }
@@ -625,4 +624,51 @@ dialog#docs-modal::backdrop {
 .floating-dark-toggle:active,
 .floating-copy-code:active {
   transform: translateY(0);
+}
+
+
+
+
+/* Thin static divider line */
+#workspace-separator {
+  width: 1px;
+  background-color: var(--line);
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+
+#separator-handle {
+  position: absolute;
+  width: 14px;
+  height: 48px;
+  background-color: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: col-resize;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#separator-handle span {
+  display: block;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background-color: var(--muted);
+  pointer-events: none;
+}
+
+@media (max-width: 991.98px) {
+  #workspace-separator {
+    display: none;
+  }
 }

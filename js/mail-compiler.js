@@ -128,17 +128,21 @@ function parseInlineMarkdown(text) {
     .replace(/\[(.*?)\]\((.*?)\)/g, (match, label, url) => {
       let cleanUrl = url.trim();
       if (!/^https?:\/\//i.test(cleanUrl) && !/^mailto:/i.test(cleanUrl)) {
-        cleanUrl = 'https://' + cleanUrl;
+        cleanUrl = "https://" + cleanUrl;
       }
       return `<a href="${cleanUrl}" target="_blank" style="color: #0066cc; text-decoration: underline;">${label}</a>`;
     });
 }
 
 function compileEmailTemplate(dslInput) {
-  if (!templateHTML) return 'Loading template...';
+  if (!templateHTML) return "Loading template...";
 
   const lines = dslInput.split("\n");
   let title = "CMIT Announcement";
+  const DEFAULT_BANNER =
+    "https://raw.githubusercontent.com/cmitiiser/cmitiiser.github.io/main/assets/icons/mail_banner.jpg";
+  let banner = DEFAULT_BANNER;
+
   let blocks = [];
   let currentBlock = null;
 
@@ -152,6 +156,15 @@ function compileEmailTemplate(dslInput) {
 
     if (line.startsWith(".title:") && !currentBlock) {
       title = line.substring(7).trim();
+      continue;
+    }
+
+    if (line.startsWith(".banner:") && !currentBlock) {
+      let url = line.substring(8).trim();
+      if (url && !/^https?:\/\//i.test(url)) {
+        url = "https://" + url;
+      }
+      banner = url || DEFAULT_BANNER;
       continue;
     }
 
@@ -193,6 +206,7 @@ function compileEmailTemplate(dslInput) {
 
   return templateHTML
     .replace("${Title}", title)
+    .replace("${Banner}", banner)
     .replace("${Content}", renderedContent);
 }
 
@@ -394,38 +408,80 @@ function updateOutput() {
 cm.setValue(defaultDSL);
 cm.on("change", updateOutput);
 
+// Soft refresh for the preview iframe to unlock scroll pipeline
+function refreshPreviewPane() {
+  if (!previewFrame) return;
+
+  previewFrame.style.pointerEvents = "auto";
+  previewFrame.style.display = "none";
+  void previewFrame.offsetHeight; // Force reflow
+  previewFrame.style.display = "block";
+
+  updateOutput();
+
+  try {
+    if (previewFrame.contentWindow) {
+      previewFrame.contentWindow.focus();
+    }
+  } catch (_) {}
+}
+
+// Soft refresh for the raw code view
+function refreshCodePane() {
+  updateOutput();
+}
+
+// Expose refresh functions globally for the splitter script
+window.refreshPreviewPane = refreshPreviewPane;
+window.refreshCodePane = refreshCodePane;
+
 function switchTab(tab) {
   const darkToggleBtn = document.getElementById("toggle-dark-mode-btn");
   const copyCodeBtn = document.getElementById("copy-code-btn");
+  const previewTab = document.getElementById("tab-preview");
+  const codeTab = document.getElementById("tab-code");
 
   if (tab === "preview") {
+    // If already active, execute a refresh
+    if (previewTab.classList.contains("active")) {
+      refreshPreviewPane();
+      return;
+    }
+
     previewFrame.style.display = "block";
     codeContainer.style.display = "none";
-    document.getElementById("tab-preview").classList.add("active");
-    document.getElementById("tab-code").classList.remove("active");
+    previewTab.classList.add("active");
+    codeTab.classList.remove("active");
 
     if (darkToggleBtn) darkToggleBtn.style.display = "flex";
     if (copyCodeBtn) copyCodeBtn.style.display = "none";
-  } else {
+
+    refreshPreviewPane();
+  } else if (tab === "code") {
+    // If already active, execute a refresh
+    if (codeTab.classList.contains("active")) {
+      refreshCodePane();
+      return;
+    }
+
     previewFrame.style.display = "none";
     codeContainer.style.display = "block";
-    document.getElementById("tab-code").classList.add("active");
-    document.getElementById("tab-preview").classList.remove("active");
+    codeTab.classList.add("active");
+    previewTab.classList.remove("active");
 
     if (darkToggleBtn) darkToggleBtn.style.display = "none";
     if (copyCodeBtn) copyCodeBtn.style.display = "flex";
+
+    refreshCodePane();
   }
 }
 
 function downloadHTML() {
   if (!generatedHTML) return;
 
-  // 1. Create a Blob object containing the compiled HTML
   const blob = new Blob([generatedHTML], { type: "text/html;charset=utf-8" });
-
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-
   link.download = "quill-mail.html";
 
   document.body.appendChild(link);
@@ -440,7 +496,6 @@ function copyToClipboard() {
   navigator.clipboard
     .writeText(generatedHTML)
     .then(() => {
-      // Select whichever copy button is currently present/rendered
       const btn =
         document.getElementById("copy-code-btn") ||
         document.getElementById("copy-btn");
