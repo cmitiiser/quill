@@ -473,6 +473,7 @@ function updateOutput() {
         left: 0;
         display: inline-block;
         transform-origin: 0 0 !important;
+        padding-bottom: 40px !important; /* Safety gutter so footers are never cut off */
       }
     </style>
     <script>
@@ -481,32 +482,44 @@ function updateOutput() {
         const container = document.getElementById("scaler-container");
         if (!canvas || !container) return;
 
-        // Reset transform to measure the authentic unscaled layout width
+        // Reset transform to accurately read unscaled dimensions
         canvas.style.transform = "none";
         canvas.style.left = "0px";
 
-        // Read the actual physical width of the rendered template
         const actualWidth = canvas.scrollWidth;
-        // Available width inside the viewport (accounting for scrollbar)
         const availableWidth = document.documentElement.clientWidth || window.innerWidth;
 
-        if (availableWidth < actualWidth && availableWidth > 0) {
+        // Use scrollHeight to include the full document height even if partially rendered
+        const actualHeight = Math.max(canvas.scrollHeight, canvas.offsetHeight);
+
+        if (actualWidth > 0 && availableWidth < actualWidth) {
           const scale = availableWidth / actualWidth;
           canvas.style.transform = "scale(" + scale + ")";
           canvas.style.left = "0px";
-          container.style.height = (canvas.offsetHeight * scale) + "px";
+          container.style.height = Math.ceil(actualHeight * scale) + "px";
         } else {
-          // Centered when the window is wider than the email
           const offset = Math.max(0, Math.floor((availableWidth - actualWidth) / 2));
           canvas.style.transform = "none";
           canvas.style.left = offset + "px";
-          container.style.height = canvas.offsetHeight + "px";
+          container.style.height = actualHeight + "px";
         }
       }
 
       window.addEventListener('resize', fitEmail);
       window.addEventListener('DOMContentLoaded', fitEmail);
-      setTimeout(fitEmail, 30);
+      window.addEventListener('load', fitEmail); // Fires when all images finish loading
+
+      // Auto-recalculate height as images pop in
+      if (window.ResizeObserver) {
+        new ResizeObserver(() => {
+          fitEmail();
+        }).observe(document.body);
+      }
+
+      // Initial triggers
+      setTimeout(fitEmail, 50);
+      setTimeout(fitEmail, 300);
+      setTimeout(fitEmail, 1000);
     </script>
     </head>`,
     )
@@ -518,6 +531,7 @@ function updateOutput() {
 
   previewFrame.srcdoc = previewDoc;
 }
+
 
 cm.setValue(defaultDSL);
 cm.on("change", updateOutput);
