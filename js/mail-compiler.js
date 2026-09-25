@@ -1,15 +1,15 @@
 let templateHTML = "";
 
-fetch('template.html')
-  .then(response => {
-    if (!response.ok) throw new Error('Failed to load template.html');
+fetch("template.html")
+  .then((response) => {
+    if (!response.ok) throw new Error("Failed to load template.html");
     return response.text();
   })
-  .then(data => {
+  .then((data) => {
     templateHTML = data;
     updateOutput();
   })
-  .catch(err => console.error('Error loading template:', err));
+  .catch((err) => console.error("Error loading template:", err));
 
 const defaultDSL = `
 // Global Directives
@@ -119,6 +119,9 @@ p {
 
 let generatedHTML = "";
 
+// Usable inner content width: 744px total card width - (45px padding * 2) = 654px
+const CONTENT_INNER_WIDTH = 744;
+
 function parseInlineMarkdown(text) {
   return text
     .replace(/&/g, "&amp;")
@@ -133,6 +136,20 @@ function parseInlineMarkdown(text) {
       }
       return `<a href="${cleanUrl}" target="_blank" style="color: #0066cc; text-decoration: underline;">${label}</a>`;
     });
+}
+
+function resolvePixelWidth(widthStr, baseWidth = CONTENT_INNER_WIDTH) {
+  if (!widthStr) return baseWidth;
+  const raw = String(widthStr).trim();
+  if (raw.endsWith("%")) {
+    const pct = parseFloat(raw) / 100;
+    return Math.round(baseWidth * pct);
+  }
+  if (raw.endsWith("px")) {
+    return parseInt(raw, 10);
+  }
+  const numeric = parseInt(raw, 10);
+  return !isNaN(numeric) ? numeric : baseWidth;
 }
 
 function compileEmailTemplate(dslInput) {
@@ -222,6 +239,12 @@ function renderBlock(block) {
     if (props["align"]) styleRules.push(`text-align: ${props["align"]};`);
     if (props["padding"]) styleRules.push(`padding: ${props["padding"]};`);
 
+    let divWidth = CONTENT_INNER_WIDTH;
+    if (props["width"]) {
+      divWidth = resolvePixelWidth(props["width"], CONTENT_INNER_WIDTH);
+      styleRules.push(`width: ${divWidth}px;`);
+    }
+
     const extraStyles = styleRules.length > 0 ? " " + styleRules.join(" ") : "";
     return `<div style="border-top: ${borderTop}; margin: ${margin};${extraStyles}"></div>`;
   }
@@ -250,32 +273,49 @@ function renderBlock(block) {
         imgUrl = "https://" + imgUrl;
       }
 
+      const finalPixelWidth = resolvePixelWidth(
+        props["width"],
+        CONTENT_INNER_WIDTH,
+      );
+
       const imgStyleRules = [
         "display: block;",
-        "max-width: 100%;",
+        `width: ${finalPixelWidth}px;`,
         "height: auto;",
-        "border: 0;",
+        "border: 0px;",
       ];
 
-      if (props["align"] === "center") {
+      const textAlign = props["align"] || "left";
+
+      if (textAlign === "center") {
         imgStyleRules.push("margin-left: auto;", "margin-right: auto;");
-      } else if (props["align"] === "right") {
+      } else if (textAlign === "right") {
         imgStyleRules.push("margin-left: auto;", "margin-right: 0;");
       }
 
-      if (props["width"]) imgStyleRules.push(`width: ${props["width"]};`);
       if (props["margin"]) imgStyleRules.push(`margin: ${props["margin"]};`);
 
       const altText = props["alt"] || "Image";
-      const imgTag = `<img src="${imgUrl}" alt="${altText}" style="${imgStyleRules.join(" ")}" />`;
+      const imgTag = `<img src="${imgUrl}" alt="${altText}" width="${finalPixelWidth}" style="${imgStyleRules.join(" ")}" />`;
 
-      const textAlign = props["align"] || "left";
-      return `<div align="${textAlign}" style="text-align: ${textAlign}; width: 100%;">${imgTag}</div>`;
+      // Center the outer wrapper box itself within the content cell
+      const wrapperMargin =
+        textAlign === "center"
+          ? "margin: 0 auto;"
+          : textAlign === "right"
+            ? "margin-left: auto; margin-right: 0;"
+            : "margin: 0;";
+
+      return `<div align="${textAlign}" style="text-align: ${textAlign}; width: ${CONTENT_INNER_WIDTH}px; max-width: 100%; ${wrapperMargin}">${imgTag}</div>`;
     }
 
     case "p": {
       const parsedText = parseInlineMarkdown(rawBodyText);
       const preStyle = props["pre"] === "true" ? "white-space: pre-wrap;" : "";
+
+      if (!props["font-size"]) styleRules.push("font-size: 18px;");
+      if (!props["line-height"]) styleRules.push("line-height: 24px;");
+
       const combinedStyle = [styleRules.join(" "), preStyle]
         .filter(Boolean)
         .join(" ");
@@ -353,11 +393,19 @@ function renderBlock(block) {
       const alignment = props["align"] || "center";
       const margin = props["margin"] || "20px 0";
 
+      // Table margin centering based on alignment
+      let tableMargin = margin;
+      if (alignment === "center") {
+        tableMargin = `${margin.split(" ")[0] || "20px"} auto`;
+      } else if (alignment === "right") {
+        tableMargin = `${margin.split(" ")[0] || "20px"} 0 ${margin.split(" ")[1] || "20px"} auto`;
+      }
+
       return `
-<table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: ${margin};">
+<table border="0" cellpadding="0" cellspacing="0" width="${CONTENT_INNER_WIDTH}" align="${alignment}" style="width: ${CONTENT_INNER_WIDTH}px; max-width: 100%; margin: ${tableMargin};">
   <tr>
     <td align="${alignment}">
-      <table border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate;">
+      <table border="0" cellpadding="0" cellspacing="0" align="${alignment}" style="border-collapse: separate; margin: 0 ${alignment === "center" ? "auto" : "0"};">
         <tr>
           <td align="center" bgcolor="${bgColor}" style="border-radius: ${borderRadius}; background-color: ${bgColor};">
             <a href="${buttonUrl}" target="_blank" style="display: inline-block; padding: ${padding}; font-size: ${fontSize}; color: ${textColor}; text-decoration: none; font-weight: bold; border-radius: ${borderRadius}; border: 1px solid ${bgColor};">
@@ -402,20 +450,87 @@ requestAnimationFrame(() => {
 
 function updateOutput() {
   generatedHTML = compileEmailTemplate(cm.getValue());
-  previewFrame.srcdoc = generatedHTML;
+
   codeContainer.textContent = generatedHTML;
+
+  const previewDoc = generatedHTML
+    .replace(
+      "</head>",
+      `
+    <style id="preview-scaler-style">
+      html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow-x: hidden !important;
+        background-color: #ffffff;
+      }
+      #scaler-container {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+      }
+      #scaler-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: inline-block;
+        transform-origin: 0 0 !important;
+      }
+    </style>
+    <script>
+      function fitEmail() {
+        const canvas = document.getElementById("scaler-canvas");
+        const container = document.getElementById("scaler-container");
+        if (!canvas || !container) return;
+
+        // Reset transform to measure the authentic unscaled layout width
+        canvas.style.transform = "none";
+        canvas.style.left = "0px";
+
+        // Read the actual physical width of the rendered template
+        const actualWidth = canvas.scrollWidth;
+        // Available width inside the viewport (accounting for scrollbar)
+        const availableWidth = document.documentElement.clientWidth || window.innerWidth;
+
+        if (availableWidth < actualWidth && availableWidth > 0) {
+          const scale = availableWidth / actualWidth;
+          canvas.style.transform = "scale(" + scale + ")";
+          canvas.style.left = "0px";
+          container.style.height = (canvas.offsetHeight * scale) + "px";
+        } else {
+          // Centered when the window is wider than the email
+          const offset = Math.max(0, Math.floor((availableWidth - actualWidth) / 2));
+          canvas.style.transform = "none";
+          canvas.style.left = offset + "px";
+          container.style.height = canvas.offsetHeight + "px";
+        }
+      }
+
+      window.addEventListener('resize', fitEmail);
+      window.addEventListener('DOMContentLoaded', fitEmail);
+      setTimeout(fitEmail, 30);
+    </script>
+    </head>`,
+    )
+    .replace(
+      /<body([^>]*)>/i,
+      `<body$1><div id="scaler-container"><div id="scaler-canvas">`,
+    )
+    .replace(/<\/body>/i, `</div></div></body>`);
+
+  previewFrame.srcdoc = previewDoc;
 }
 
 cm.setValue(defaultDSL);
 cm.on("change", updateOutput);
 
-// Soft refresh for the preview iframe to unlock scroll pipeline
+// Soft refresh for the preview iframe
 function refreshPreviewPane() {
   if (!previewFrame) return;
 
   previewFrame.style.pointerEvents = "auto";
   previewFrame.style.display = "none";
-  void previewFrame.offsetHeight; // Force reflow
+  void previewFrame.offsetHeight;
   previewFrame.style.display = "block";
 
   updateOutput();
@@ -427,12 +542,10 @@ function refreshPreviewPane() {
   } catch (_) {}
 }
 
-// Soft refresh for the raw code view
 function refreshCodePane() {
   updateOutput();
 }
 
-// Expose refresh functions globally for the splitter script
 window.refreshPreviewPane = refreshPreviewPane;
 window.refreshCodePane = refreshCodePane;
 
@@ -443,7 +556,6 @@ function switchTab(tab) {
   const codeTab = document.getElementById("tab-code");
 
   if (tab === "preview") {
-    // If already active, execute a refresh
     if (previewTab.classList.contains("active")) {
       refreshPreviewPane();
       return;
@@ -459,7 +571,6 @@ function switchTab(tab) {
 
     refreshPreviewPane();
   } else if (tab === "code") {
-    // If already active, execute a refresh
     if (codeTab.classList.contains("active")) {
       refreshCodePane();
       return;
@@ -511,14 +622,14 @@ function copyToClipboard() {
 }
 
 /* ---- Documentation modal ---- */
-
 const docsModal = document.getElementById("docs-modal");
-document
-  .getElementById("docs-btn")
-  .addEventListener("click", () => docsModal.showModal());
-document
-  .getElementById("docs-close")
-  .addEventListener("click", () => docsModal.close());
+if (docsModal) {
+  const docsBtn = document.getElementById("docs-btn");
+  const docsClose = document.getElementById("docs-close");
+
+  if (docsBtn) docsBtn.addEventListener("click", () => docsModal.showModal());
+  if (docsClose) docsClose.addEventListener("click", () => docsModal.close());
+}
 
 let isDarkModePreview = false;
 
@@ -526,10 +637,12 @@ function toggleDarkModePreview() {
   isDarkModePreview = !isDarkModePreview;
   const btn = document.getElementById("toggle-dark-mode-btn");
 
-  if (isDarkModePreview) {
-    btn.classList.add("active");
-  } else {
-    btn.classList.remove("active");
+  if (btn) {
+    if (isDarkModePreview) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
   }
 
   applyDarkModeToIframe();
@@ -570,7 +683,6 @@ function applyDarkModeToIframe() {
 const originalUpdateOutput = updateOutput;
 updateOutput = function () {
   originalUpdateOutput();
-
   setTimeout(applyDarkModeToIframe, 50);
 };
 
@@ -578,8 +690,14 @@ async function copyRenderedHTML() {
   if (!generatedHTML) return;
 
   try {
-    const htmlBlob = new Blob([generatedHTML], { type: "text/html" });
-    const textBlob = new Blob([generatedHTML], { type: "text/plain" });
+    let cleanHTML = generatedHTML;
+    const bodyMatch = generatedHTML.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+    if (bodyMatch && bodyMatch[1]) {
+      cleanHTML = bodyMatch[1].trim();
+    }
+
+    const htmlBlob = new Blob([cleanHTML], { type: "text/html" });
+    const textBlob = new Blob([cleanHTML], { type: "text/plain" });
 
     await navigator.clipboard.write([
       new ClipboardItem({
@@ -588,7 +706,9 @@ async function copyRenderedHTML() {
       }),
     ]);
 
-    const btn = document.getElementById("copy-rendered-btn");
+    const btn =
+      document.getElementById("copy-rendered-btn") ||
+      document.getElementById("copy-btn");
     if (btn) {
       btn.classList.add("is-copied");
       setTimeout(() => btn.classList.remove("is-copied"), 2000);

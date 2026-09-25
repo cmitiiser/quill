@@ -1,10 +1,25 @@
+// Splitter / Drag Handle logic with instant scale sync
 (function () {
-  const handle = document.getElementById("separator-handle") || document.getElementById("workspace-separator");
+  const handle =
+    document.getElementById("separator-handle") ||
+    document.getElementById("workspace-separator");
   const left = document.querySelector(".editor-pane");
   const container = document.querySelector(".workspace");
   const previewFrame = document.getElementById("html-preview");
 
   if (!handle || !left || !container) return;
+
+  function triggerIframeFit() {
+    try {
+      if (
+        previewFrame &&
+        previewFrame.contentWindow &&
+        typeof previewFrame.contentWindow.fitEmail === "function"
+      ) {
+        previewFrame.contentWindow.fitEmail();
+      }
+    } catch (_) {}
+  }
 
   handle.addEventListener("pointerdown", (e) => {
     handle.setPointerCapture(e.pointerId);
@@ -19,6 +34,7 @@
     if (offset > 180 && offset < container.clientWidth - 180) {
       left.style.flex = "none";
       left.style.width = offset + "px";
+      triggerIframeFit();
     }
   });
 
@@ -29,7 +45,7 @@
     document.body.style.userSelect = "";
     if (previewFrame) previewFrame.style.pointerEvents = "";
 
-    if (window.refreshPreviewPane) window.refreshPreviewPane();
+    triggerIframeFit();
   }
 
   handle.addEventListener("pointerup", stopDrag);
