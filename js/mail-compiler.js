@@ -41,7 +41,6 @@ p {
   Welcome to the **Email Builder DSL** test template! This script is designed as a *comprehensive boilerplate* to demonstrate every block type, modifier property, and text formatting option supported by the compiler.
 }
 .color: #2c3e50
-.font-size: 16px
 .line-height: 1.6
 .align: left
 .margin: 15px 0
@@ -62,7 +61,6 @@ list {
 .padding: 10px 0 10px 20px
 .margin: 10px 0
 .color: #34495e
-.font-size: 15px
 .line-height: 1.5
 
 // Secondary Divider (Solid Border)
@@ -79,7 +77,7 @@ ol {
 }
 .padding: 5px 0 5px 20px
 .margin: 15px 0
-.font-size: 14px
+.font-size: 16px
 .color: #27ae60
 
 // Paragraph Block with Preserved Formatting (.pre: true)
@@ -106,7 +104,7 @@ ul {
 .padding: 0
 .margin: 15px 0
 .color: #7f8c8d
-.font-size: 13px
+.font-size: 15px
 
 // Closing Paragraph
 p {
