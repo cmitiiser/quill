@@ -1,3 +1,8 @@
+<div style='align-items: center; width: 100%; background-color: #e4ecf0; margin-bottom: 30px;'>
+    <img src="https://cmit.iisertvm.ac.in/assets/icons/mail_banner.jpg"></img>
+</div>
+
+
 <div align='center'>
 <h1>Quill</h1>
 <p>CMIT's proprietary mail drafting application</p>
