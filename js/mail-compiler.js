@@ -54,7 +54,7 @@ div {}
 list {
   * **Global Directives:** Title assignment via .title: directive
   * **Inline Formatting:** Supports **bold**, *italics*, and smart hyperlinking
-  * **Auto-prefixed Link:** Visit [IISER TVM CMIT](cmit.iisertvm.ac.in) for details
+  * **Auto-prefixed Link:** Visit [Srijana Github Repository](https://github.com/PragunNepal/Srijana) for details
   * **Explicit Web Link:** Check [Google](https://www.google.com) safely
   * **Email Link Scheme:** Contact [Support Team](mailto:support@example.com) directly
 }
