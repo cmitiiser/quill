@@ -11,8 +11,7 @@ fetch("template.html")
   })
   .catch((err) => console.error("Error loading template:", err));
 
-const defaultDSL = `
-// Global Directives
+const defaultDSL = `// Global Directives
 .title: Feature Showcase & Integration Testing Guide
 .banner: https://cmit.iisertvm.ac.in/assets/icons/mail_banner.jpg
 
@@ -54,9 +53,7 @@ div {}
 list {
   * **Global Directives:** Title assignment via .title: directive
   * **Inline Formatting:** Supports **bold**, *italics*, and smart hyperlinking
-  * **Auto-prefixed Link:** Visit [Srijana Github Repository](https://github.com/PragunNepal/Srijana) for details
   * **Explicit Web Link:** Check [Google](https://www.google.com) safely
-  * **Email Link Scheme:** Contact [Support Team](mailto:support@example.com) directly
 }
 .padding: 10px 0 10px 20px
 .margin: 10px 0
@@ -162,6 +159,9 @@ function compileEmailTemplate(dslInput) {
   let blocks = [];
   let currentBlock = null;
 
+  const DEFAULT_GREETINGS = "Greetings from<br/>Club of Mathematics, IISER TVM!";
+  let greetings = DEFAULT_GREETINGS;
+
   for (let i = 0; i < lines.length; i++) {
     const rawLine = lines[i];
     const line = rawLine.trim();
@@ -172,6 +172,11 @@ function compileEmailTemplate(dslInput) {
 
     if (line.startsWith(".title:") && !currentBlock) {
       title = line.substring(7).trim();
+      continue;
+    }
+
+    if (line.startsWith(".greetings:") && !currentBlock) {
+      greetings = line.substring(11).trim();
       continue;
     }
 
@@ -221,8 +226,9 @@ function compileEmailTemplate(dslInput) {
   const renderedContent = blocks.map(renderBlock).join("\n\n");
 
   return templateHTML
-    .replace("${Title}", title)
     .replace("${Banner}", banner)
+    .replace("${Greetings}", greetings)
+    .replace("${Title}", title)
     .replace("${Content}", renderedContent);
 }
 
@@ -453,13 +459,12 @@ function updateOutput() {
 
   const previewDoc = generatedHTML
     .replace(
-      "</head>",
-      `
+    "</head>",
+    `
     <style id="preview-scaler-style">
       html, body {
         margin: 0 !important;
         padding: 0 !important;
-        overflow-x: hidden !important;
         background-color: #ffffff;
       }
       #scaler-container {
@@ -512,7 +517,7 @@ function updateOutput() {
       // Auto-recalculate height as images pop in
       if (window.ResizeObserver) {
         new ResizeObserver(() => {
-          fitEmail();
+      fitEmail();
         }).observe(document.body);
       }
 
@@ -650,10 +655,10 @@ function toggleDarkModePreview() {
   const btn = document.getElementById("toggle-dark-mode-btn");
 
   if (btn) {
-    if (isDarkModePreview) {
-      btn.classList.add("active");
-    } else {
-      btn.classList.remove("active");
+  if (isDarkModePreview) {
+    btn.classList.add("active");
+  } else {
+    btn.classList.remove("active");
     }
   }
 

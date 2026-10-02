@@ -6,6 +6,7 @@ CodeMirror.defineSimpleMode("cmitdsl", { // Matches mode: "cmitdsl" in your comp
     // Title directive: .title:
     { regex: /\.title(?=\s*:)/, token: "keyword" },
     { regex: /\.banner(?=\s*:)/, token: "keyword" },
+    { regex: /\.greetings(?=\s*:)/, token: "keyword" },
 
     // Property keys following a block: .margin:, .align:, .font-size:, etc.
     { regex: /\.[a-zA-Z0-9_-]+(?=\s*:)/, token: "def" },
