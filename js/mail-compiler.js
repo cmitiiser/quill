@@ -13,7 +13,7 @@ fetch("template.html")
 
 const defaultDSL = `// Global Directives
 .title: Feature Showcase & Integration Testing Guide
-.banner: https://cmit.iisertvm.ac.in/assets/icons/mail_banner.jpg
+.banner: https://raw.githubusercontent.com/cmitiiser/cmitiiser.github.io/main/assets/brand/banner_v2.jpg
 
 // Banner / Image Block / Poster Block
 img {
@@ -153,13 +153,14 @@ function compileEmailTemplate(dslInput) {
   const lines = dslInput.split("\n");
   let title = "CMIT Announcement";
   const DEFAULT_BANNER =
-    "https://raw.githubusercontent.com/cmitiiser/cmitiiser.github.io/main/assets/icons/mail_banner.jpg";
+    "https://raw.githubusercontent.com/cmitiiser/cmitiiser.github.io/main/assets/brand/banner_v2.jpg";
   let banner = DEFAULT_BANNER;
 
   let blocks = [];
   let currentBlock = null;
 
-  const DEFAULT_GREETINGS = "Greetings from<br/>Club of Mathematics, IISER TVM!";
+  const DEFAULT_GREETINGS =
+    "Greetings from<br/>Club of Mathematics, IISER TVM!";
   let greetings = DEFAULT_GREETINGS;
 
   for (let i = 0; i < lines.length; i++) {
@@ -277,14 +278,13 @@ function renderBlock(block) {
         imgUrl = "https://" + imgUrl;
       }
 
-      const finalPixelWidth = resolvePixelWidth(
-        props["width"],
-        CONTENT_INNER_WIDTH,
-      );
+      const rawWidth = props["width"] ? String(props["width"]).trim() : "100%";
+      const cssWidth = /^\d+$/.test(rawWidth) ? `${rawWidth}px` : rawWidth;
 
       const imgStyleRules = [
         "display: block;",
-        `width: ${finalPixelWidth}px;`,
+        `width: ${cssWidth};`,
+        "max-width: 100%;",
         "height: auto;",
         "border: 0px;",
       ];
@@ -300,17 +300,9 @@ function renderBlock(block) {
       if (props["margin"]) imgStyleRules.push(`margin: ${props["margin"]};`);
 
       const altText = props["alt"] || "Image";
-      const imgTag = `<img src="${imgUrl}" alt="${altText}" width="${finalPixelWidth}" style="${imgStyleRules.join(" ")}" />`;
+      const imgTag = `<img src="${imgUrl}" alt="${altText}" style="${imgStyleRules.join(" ")}" />`;
 
-      // Center the outer wrapper box itself within the content cell
-      const wrapperMargin =
-        textAlign === "center"
-          ? "margin: 0 auto;"
-          : textAlign === "right"
-            ? "margin-left: auto; margin-right: 0;"
-            : "margin: 0;";
-
-      return `<div align="${textAlign}" style="text-align: ${textAlign}; width: ${CONTENT_INNER_WIDTH}px; max-width: 100%; ${wrapperMargin}">${imgTag}</div>`;
+      return `<div align="${textAlign}" style="text-align: ${textAlign}; width: 100%;">${imgTag}</div>`;
     }
 
     case "p": {
@@ -397,7 +389,6 @@ function renderBlock(block) {
       const alignment = props["align"] || "center";
       const margin = props["margin"] || "20px 0";
 
-      // Table margin centering based on alignment
       let tableMargin = margin;
       if (alignment === "center") {
         tableMargin = `${margin.split(" ")[0] || "20px"} auto`;
@@ -406,7 +397,7 @@ function renderBlock(block) {
       }
 
       return `
-<table border="0" cellpadding="0" cellspacing="0" width="${CONTENT_INNER_WIDTH}" align="${alignment}" style="width: ${CONTENT_INNER_WIDTH}px; max-width: 100%; margin: ${tableMargin};">
+<table border="0" cellpadding="0" cellspacing="0" width="100%" align="${alignment}" style="width: 100%; margin: ${tableMargin};">
   <tr>
     <td align="${alignment}">
       <table border="0" cellpadding="0" cellspacing="0" align="${alignment}" style="border-collapse: separate; margin: 0 ${alignment === "center" ? "auto" : "0"};">
@@ -459,8 +450,8 @@ function updateOutput() {
 
   const previewDoc = generatedHTML
     .replace(
-    "</head>",
-    `
+      "</head>",
+      `
     <style id="preview-scaler-style">
       html, body {
         margin: 0 !important;
@@ -536,7 +527,6 @@ function updateOutput() {
 
   previewFrame.srcdoc = previewDoc;
 }
-
 
 cm.setValue(defaultDSL);
 cm.on("change", updateOutput);
@@ -655,10 +645,10 @@ function toggleDarkModePreview() {
   const btn = document.getElementById("toggle-dark-mode-btn");
 
   if (btn) {
-  if (isDarkModePreview) {
-    btn.classList.add("active");
-  } else {
-    btn.classList.remove("active");
+    if (isDarkModePreview) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
     }
   }
 
@@ -733,6 +723,19 @@ async function copyRenderedHTML() {
   } catch (err) {
     console.error("Failed to copy rendered GUI: ", err);
   }
+
+  
+  const btn = document.getElementById("copy-btn");
+  const icon = btn.querySelector(".ux-icon");
+
+  btn.classList.add("is-copied");
+
+  icon.src = "icons/checkmark.svg";
+
+  setTimeout(() => {
+    btn.classList.remove("is-copied");
+    icon.src = "icons/copy.svg";
+  }, 1000);
 }
 
 function copyRawHTML() {
