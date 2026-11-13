@@ -74,7 +74,6 @@ ol {
 }
 .padding: 5px 0 5px 20px
 .margin: 15px 0
-.font-size: 16px
 .color: #27ae60
 
 // Paragraph Block with Preserved Formatting (.pre: true)
@@ -101,7 +100,6 @@ ul {
 .padding: 0
 .margin: 15px 0
 .color: #7f8c8d
-.font-size: 15px
 
 // Closing Paragraph
 p {
@@ -111,6 +109,7 @@ p {
 .color: #888888
 .font-size: 12px
 .margin: 30px 0 10px 0`;
+
 
 let generatedHTML = "";
 
@@ -309,8 +308,9 @@ function renderBlock(block) {
       const parsedText = parseInlineMarkdown(rawBodyText);
       const preStyle = props["pre"] === "true" ? "white-space: pre-wrap;" : "";
 
-      if (!props["font-size"]) styleRules.push("font-size: 15px;");
-      if (!props["line-height"]) styleRules.push("line-height: 23px;");
+      if (!props["font-size"]) styleRules.push("font-size: 13.5px;");
+      if (!props["line-height"]) styleRules.push("line-height: 20px;");
+      styleRules.push("-webkit-text-size-adjust: 100%;");
 
       const combinedStyle = [styleRules.join(" "), preStyle]
         .filter(Boolean)
@@ -318,7 +318,6 @@ function renderBlock(block) {
       const attr = combinedStyle ? ` style="${combinedStyle}"` : "";
       return `<p${attr}>${parsedText}</p>`;
     }
-
 
     case "list":
     case "ul":
@@ -335,6 +334,10 @@ function renderBlock(block) {
       if (!props["padding"]) {
         styleRules.push(isNone ? "padding-left: 0;" : "padding-left: 10px;");
       }
+
+      if (!props["font-size"]) styleRules.push("font-size: 13.5px;");
+      if (!props["line-height"]) styleRules.push("line-height: 20px;");
+      styleRules.push("-webkit-text-size-adjust: 100%;");
 
       const listItems = block.bodyLines
         .map((l) => l.trim())
@@ -725,7 +728,6 @@ async function copyRenderedHTML() {
     console.error("Failed to copy rendered GUI: ", err);
   }
 
-  
   const btn = document.getElementById("copy-btn");
   const icon = btn.querySelector(".ux-icon");
 
