@@ -4,20 +4,31 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
+      body,
       div,
       p,
       a,
       li,
       td {
-        -webkit-text-size-adjust: none;
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
       }
       @media only screen and (min-width: 700px) {
+        .quill-greetings {
+          font-size: 20px !important;
+        }
         .quill-title {
           font-size: 36px !important;
           margin: 0 60px !important;
         }
         .quill-content {
           padding: 0 35px 30px !important;
+          font-size: 18px !important;
+        }
+        .quill-content p,
+        .quill-content li {
+          font-size: 18px !important;
+          line-height: 26px !important;
         }
       }
     </style>
@@ -38,7 +49,6 @@
         box-sizing: border-box;
       "
     >
-
       <tbody>
         <tr>
           <td align="center">
@@ -76,9 +86,10 @@
                 <tr>
                   <td style="padding: 20px 20px 10px; text-align: center">
                     <h2
+                      class="quill-greetings"
                       style="
                         margin: 0;
-                        font-size: 20px;
+                        font-size: 17px;
                         color: #444444;
                         font-weight: normal;
                       "
@@ -95,7 +106,7 @@
                       style="
                         margin: 0 auto;
                         max-width: 680px;
-                        font-size: 28px;
+                        font-size: 24px;
                         line-height: 1.25;
                         color: #000000;
                       "
@@ -111,9 +122,9 @@
                     style="
                       padding: 0 20px 30px;
                       color: #000000;
-                      font-size: 1.05rem;
+                      font-size: 15px;
                       letter-spacing: 0rem;
-                      line-height: 1.5;
+                      line-height: 1.55;
                     "
                   >
                     ${Content}

@@ -309,8 +309,8 @@ function renderBlock(block) {
       const parsedText = parseInlineMarkdown(rawBodyText);
       const preStyle = props["pre"] === "true" ? "white-space: pre-wrap;" : "";
 
-      if (!props["font-size"]) styleRules.push("font-size: 18px;");
-      if (!props["line-height"]) styleRules.push("line-height: 24px;");
+      if (!props["font-size"]) styleRules.push("font-size: 15px;");
+      if (!props["line-height"]) styleRules.push("line-height: 23px;");
 
       const combinedStyle = [styleRules.join(" "), preStyle]
         .filter(Boolean)
@@ -318,6 +318,7 @@ function renderBlock(block) {
       const attr = combinedStyle ? ` style="${combinedStyle}"` : "";
       return `<p${attr}>${parsedText}</p>`;
     }
+
 
     case "list":
     case "ul":
